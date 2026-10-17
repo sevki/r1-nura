@@ -1,0 +1,62 @@
+name: Kernel package build
+# Build changes to the kernel package; this does not test on-device boot.
+on:
+  push:
+    paths:
+      - 'device/**'
+      - 'sources.json'
+      - 'tools/check_port.py'
+      - 'tools/fetch_sources.py'
+      - 'tools/ci_kernel.sh'
+      - '.github/workflows/kernel.yml'
+  pull_request:
+    paths:
+      - 'device/**'
+      - 'sources.json'
+      - 'tools/check_port.py'
+      - 'tools/fetch_sources.py'
+      - 'tools/ci_kernel.sh'
+      - '.github/workflows/kernel.yml'
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install pmbootstrap host requirements
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git python3 kpartx util-linux openssl xz-utils
+      - name: Build kernel and device packages
+        shell: bash
+        run: |
+          mkdir -p work
+          set -o pipefail
+          sh tools/ci_kernel.sh 2>&1 | tee work/kernel-ci.log
+      - name: Save packages and diagnostic logs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: rabbit-r1-kernel-build
+          path: |
+            work/kernel-ci.log
+            work/checks/*.log
+            work/pmb-ci/log.txt
+            work/pmb-ci/packages/**/*.apk
+            device/testing/linux-rabbit-r1/config-rabbit-r1.aarch64
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Unmount build chroots
+        if: always()
+        run: |
+          if [ -f work/pmb-ci.cfg ]; then
+            python3 work/pmbootstrap/pmbootstrap.py -c "$PWD/work/pmb-ci.cfg" shutdown
+          fi

@@ -1,0 +1,24 @@
+maintainer=""
+pkgname=device-rabbit-r1
+pkgdesc="Rabbit R1 (bring-up scaffold)"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-rabbit-r1"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build "$startdir" "$pkgname"
+}
+
+package() {
+	devicepkg_package "$startdir" "$pkgname"
+}
+
+sha512sums="
+d3ba525b222cfcfd365774ff54c43f7d87b823fd143dc5c0b013d7088863672b6287eb0bdd12c5820ed7bed16159dc7644105d434793954e6476e0a4914ff296  deviceinfo
+"

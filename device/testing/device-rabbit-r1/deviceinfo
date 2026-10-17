@@ -1,0 +1,16 @@
+# Reference: https://wiki.postmarketos.org/wiki/Deviceinfo_reference
+# Scaffold only: boot-image parameters remain unverified.
+deviceinfo_format_version="0"
+deviceinfo_name="Rabbit R1"
+deviceinfo_manufacturer="Rabbit"
+deviceinfo_codename="rabbit-r1"
+deviceinfo_year="2024"
+deviceinfo_arch="aarch64"
+deviceinfo_chassis="handset"
+deviceinfo_external_storage="false"
+deviceinfo_screen_width="480"
+deviceinfo_screen_height="640"
+# Do not enable image generation or flashing until the stock boot header,
+# kernel layout, DTB placement, and a recovery method have been verified.
+deviceinfo_flash_method="none"
+deviceinfo_generate_bootimg="false"

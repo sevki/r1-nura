@@ -1,0 +1,51 @@
+# Downstream bring-up candidate; boot integration is not yet validated.
+# Config based on arch/arm64/configs/k65v1_64_bsp_defconfig at _commit.
+maintainer=""
+_flavor="rabbit-r1"
+pkgname=linux-$_flavor
+pkgver=4.19.191
+pkgrel=0
+pkgdesc="Rabbit R1 downstream kernel (bring-up)"
+arch="aarch64"
+_carch="arm64"
+url="https://github.com/rabbit-hmi-oss/android_kernel_rabbit_mt6765"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="bash bc bison devicepkg-dev findutils flex linux-headers openssl-dev perl python3"
+_repository="android_kernel_rabbit_mt6765"
+_commit="8167c8c1087f057d2ef302fc93b47554291687ec"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::$url/archive/$_commit.tar.gz
+	$_config
+	0001-fix-cross-unit-inline-declarations.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	REPLACE_GCCH=0 . downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1))-postmarketOS" Image.gz modules
+}
+
+package() {
+	# The vendor build emits Image.gz separately from the SoC DTB and board
+	# overlay. Do not append the overlay or substitute it for a complete DTB.
+	KERNEL_IMAGE_NAME=Image.gz downstreamkernel_package \
+		"$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		INSTALL_MOD_PATH="$pkgdir" INSTALL_MOD_STRIP=1 modules_install
+	rm -f "$pkgdir"/lib/modules/*/build "$pkgdir"/lib/modules/*/source
+}
+
+sha512sums="
+dac94e90fe3e49d6eefab319828277e2ba26caaba5ca9ede1641dbd999641f8cf81ef30a54807a8691f19b95c60bf018b5f8538f33cd1451a13c79113b7b5800  linux-rabbit-r1-8167c8c1087f057d2ef302fc93b47554291687ec.tar.gz
+4b57847c965ce608a17f6f24fe9811457a657187628f900a17bb97b191f16c072f21ecdf75fad6125ccd7187208f34959ea9e599e082817a1ad822de158ebf02  config-rabbit-r1.aarch64
+6e84abe811dd3650767f9b89365e2babe1feb8fd1f810839efd5255d4c9eeb4a9caad83b5d5c4b988875a910dc4f38657713450ee2f10504e0ed75f68e08c1f4  0001-fix-cross-unit-inline-declarations.patch
+"

@@ -1,0 +1,22 @@
+{
+  "pmbootstrap": {
+    "url": "https://github.com/sevki/pmbootstrap.git",
+    "commit": "32e9aebe4336a852c199dfccd72159b1e88434a1"
+  },
+  "pmaports": {
+    "url": "https://github.com/sevki/pmaports.git",
+    "commit": "f662ccdee08d3a37646e538238cdf0f271497c19"
+  },
+  "kernel": {
+    "url": "https://github.com/rabbit-hmi-oss/android_kernel_rabbit_mt6765.git",
+    "commit": "8167c8c1087f057d2ef302fc93b47554291687ec"
+  },
+  "boot-notes": {
+    "url": "https://github.com/DavidBuchanan314/rabbit_r1_boot_notes.git",
+    "commit": "b1b35b1ea9023d7b38df407afb5911fd54287c2f"
+  },
+  "pmaports-metadata": {
+    "url": "https://gitlab.postmarketos.org/postmarketOS/pmaports.git",
+    "commit": "dfb010f5b9885d185d089b6e1e493030062f9756"
+  }
+}

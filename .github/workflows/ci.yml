@@ -1,0 +1,37 @@
+name: Port checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Boot image inspection tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Shell syntax
+        run: |
+          sh -n tools/ci_kernel.sh
+          sh -n device/testing/device-rabbit-r1/APKBUILD
+          sh -n device/testing/device-rabbit-r1/deviceinfo
+          sh -n device/testing/linux-rabbit-r1/APKBUILD
+      - name: Fetch pinned packaging tools
+        run: python3 tools/fetch_sources.py
+      - name: Validate aports and kernel configuration
+        run: python3 tools/check_port.py --pmbootstrap work/pmbootstrap --pmaports work/pmaports
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: port-check-logs
+          path: work/checks/*.log
+          if-no-files-found: ignore
+          retention-days: 14
